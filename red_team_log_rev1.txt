@@ -1,0 +1,23 @@
+Sites: 62113
+
+Baseline: 83 of 62113 original sites (0.13%) are off land in the Census file.
+
+E1 bias (seed 42): mean north 3.2 m (SE 4.0), mean east 0.5 m (SE 4.1), median offset 677.4 m
+
+E2/E5 water placement and cap (5 seeds each):
+  MaxRadius_m Inf   : on-land sites pushed off land 0.55% (range 0.53-0.56%), sites capped 0, max offset 99372 m
+  MaxRadius_m 5000  : on-land sites pushed off land 0.54% (range 0.52-0.56%), sites capped 1076, max offset 5000 m
+  MaxRadius_m 2000  : on-land sites pushed off land 0.52% (range 0.49-0.54%), sites capped 14823, max offset 2000 m
+
+E3/E4 receivers: 500, original nearest base station median 3480 m
+  Fraction 0.100: nearest got closer in 50.9% of receiver-seeds; median change -5 m (-0.1%); 5th pct -565 m (-16.4%); worst -3227 m
+                  seed-to-seed spread of nearest distance: median 733 m, 95th pct 2090 m; count within 10 km changes in 21.2% of receiver-seeds (mean count 20.35 vs 20.34)
+  Fraction 0.333: nearest got closer in 49.4% of receiver-seeds; median change +11 m (+0.2%); 5th pct -1693 m (-41.8%); worst -10824 m
+                  seed-to-seed spread of nearest distance: median 2298 m, 95th pct 6477 m; count within 10 km changes in 45.0% of receiver-seeds (mean count 20.37 vs 20.34)
+  Fraction 0.450: nearest got closer in 48.6% of receiver-seeds; median change +29 m (+0.9%); 5th pct -2172 m (-48.9%); worst -13943 m
+                  seed-to-seed spread of nearest distance: median 2963 m, 95th pct 8333 m; count within 10 km changes in 51.4% of receiver-seeds (mean count 20.38 vs 20.34)
+
+E6 offsets by Height_M class (seed 42):
+  20 m: 16212 sites, median NN 1629 m, median offset 320 m, 95th pct 782 m, max 3058 m
+  25 m: 20994 sites, median NN 2777 m, median offset 582 m, 95th pct 1281 m, max 8932 m
+  35 m: 24907 sites, median NN 7067 m, median offset 1454 m, 95th pct 3712 m, max 103555 m

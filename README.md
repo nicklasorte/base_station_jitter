@@ -50,6 +50,8 @@ picks the closest of the top three candidates.
 | `run_jitter_rsu_hiak_rev1.m` | Example driver that jitters `Rand_Table_RSU_HIAK.xlsx` and prints QA statistics. |
 | `test_jitter_base_station_table_rev1.m` | Unit tests for the spreadsheet function. |
 | `test_jitter_base_stations_rev1.m` | Unit tests for the core function. |
+| `RED_TEAM_rev1.md` | Red-team review from a skeptical federal agency's view, with findings and responses. |
+| `red_team_log_rev1.txt` | Raw output of the red-team run that the review cites. |
 | `red_team_experiments_rev1.m` | Adversarial checks: displacement bias, water placement, separation from protected receivers, and sensitivity to `Fraction` and `MaxRadius_m`. Needs the public Census `cb_2023_us_state_500k` file. |
 | `Rand_Table_RSU_HIAK.xlsx` | Original base station table from FSS_Neighborhood (62,113 sites). |
 
