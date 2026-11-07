@@ -111,7 +111,15 @@ The spreadsheet tests check that the same seed gives the same table, the
 result matches the core function, non-coordinate columns are unchanged,
 the output file round-trips, no file is written unless asked, CSV input
 and custom column names work, the function refuses to overwrite its input
-or accept NaN coordinates, and the full HIAK table jitters cleanly.
+or accept blank or NaN values in any column, a relative `OutputFile`
+resolves against the current folder, two parallel workers writing the same
+`OutputFile` never expose a partial file to a reader, and the full HIAK
+table jitters cleanly. The two-worker test is filtered, not passed, when no
+parallel pool is available.
+
+`OutputFile` is written to a temporary file in the same folder and then
+renamed into place atomically, so several servers can write the same seed's
+output at once.
 
 ## Result on Rand_Table_RSU_HIAK.xlsx (seed 42)
 

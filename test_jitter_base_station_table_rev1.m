@@ -92,6 +92,56 @@ classdef test_jitter_base_station_table_rev1 < matlab.unittest.TestCase
             writetable(bad, bad_file);
             tc.verifyError(@() jitter_base_station_table_rev1(bad_file, 42), ...
                 "jitter_base_station_table:badCoordinates");
+
+            % A blank in a non-coordinate column reads as NaN; fail, don't pass it through.
+            blank = tc.input_table; blank.Height_M(7) = NaN;
+            blank_file = fullfile(tc.work_folder, "blank.xlsx");
+            writetable(blank, blank_file);
+            tc.verifyError(@() jitter_base_station_table_rev1(blank_file, 42), ...
+                "jitter_base_station_table:missingValues");
+        end
+
+        function relative_output_path(tc)
+            % A relative OutputFile resolves against pwd, not the JVM folder.
+            tc.applyFixture(matlab.unittest.fixtures.CurrentFolderFixture(tc.work_folder));
+            jitter_base_station_table_rev1("sites.xlsx", 42, OutputFile="rel_out.xlsx");
+            tc.verifyTrue(isfile(fullfile(tc.work_folder, "rel_out.xlsx")));
+            tc.verifyEmpty(dir(fullfile(tc.work_folder, "*.part_*")));
+        end
+
+        function two_servers_same_output_file(tc)
+            % Two workers write the same OutputFile while this process polls it.
+            % A reader must never see a partial file, and no temp files remain.
+            tc.assumeTrue(canUseParallelPool, "No parallel pool available.");
+            pool = gcp("nocreate");
+            if isempty(pool)
+                pool = parpool(2);
+            end
+            tc.assumeGreaterThanOrEqual(pool.NumWorkers, 2, "Need two workers.");
+            code_folder = fileparts(which("jitter_base_station_table_rev1"));
+            parfevalOnAll(pool, @addpath, 0, code_folder);
+            out_file = fullfile(tc.work_folder, "shared_out.xlsx");
+            f1 = parfeval(pool, @jitter_base_station_table_rev1, 1, tc.input_file, 42, OutputFile=out_file);
+            f2 = parfeval(pool, @jitter_base_station_table_rev1, 1, tc.input_file, 42, OutputFile=out_file);
+            num_bad = 0;
+            num_polls = 0;
+            while ~(strcmp(f1.State, "finished") && strcmp(f2.State, "finished"))
+                if isfile(out_file)
+                    num_polls = num_polls + 1;
+                    try
+                        if height(readtable(out_file)) ~= height(tc.input_table)
+                            num_bad = num_bad + 1;
+                        end
+                    catch
+                        num_bad = num_bad + 1;
+                    end
+                end
+            end
+            tc.verifyEmpty(f1.Error);
+            tc.verifyEmpty(f2.Error);
+            tc.verifyEqual(num_bad, 0, sprintf("%d of %d polled reads were partial.", num_bad, num_polls));
+            tc.verifyEqual(height(readtable(out_file)), height(tc.input_table));
+            tc.verifyEmpty(dir(fullfile(tc.work_folder, "*.part_*")));
         end
 
         function hiak_table_smoke(tc)

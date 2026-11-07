@@ -60,6 +60,15 @@ if ~isnumeric(lat) || ~isnumeric(lon) || any(~isfinite([lat; lon]))
     error("jitter_base_station_table:badCoordinates", ...
         "%s and %s in %s must be numeric with no blank or NaN rows.", lat_var, lon_var, input_file);
 end
+% readtable turns unparseable text (for example a value with a non-breaking
+% space) into NaN without warning. The output is meant to replace the
+% input, so a silent NaN in any column would corrupt the downstream run.
+has_missing = any(ismissing(bs_table), 1);
+if any(has_missing)
+    error("jitter_base_station_table:missingValues", ...
+        "%s has blank, NaN, or unreadable values in column(s) %s. Check them with readcell.", ...
+        input_file, strjoin(var_names(has_missing), ", "));
+end
 
 %%%%% 2) Jitter.
 [lat_new, lon_new, jitter_info] = jitter_base_stations_rev1(lat, lon, ...
@@ -81,6 +90,34 @@ if strlength(options.OutputFile) > 0
                 "OutputFile is the same as the input file %s. Choose another name.", input_file);
         end
     end
-    writetable(jitter_table, options.OutputFile);
+    write_table_atomic(jitter_table, options.OutputFile);
+end
+end
+
+function write_table_atomic(out_table, out_file)
+% Write to a uniquely named temp file in the same folder, then rename it
+% into place, so a reader (or a second server writing the same file) never
+% sees a partial file. movefile isn't atomic; java.nio Files.move with
+% ATOMIC_MOVE is.
+out_file = string(out_file);
+if ~java.io.File(out_file).isAbsolute()
+    out_file = fullfile(pwd, out_file);
+end
+[out_folder, out_name, out_ext] = fileparts(out_file);
+if ~isfolder(out_folder)
+    error("jitter_base_station_table:noOutputFolder", "Output folder %s doesn't exist.", out_folder);
+end
+temp_file = fullfile(out_folder, out_name + ".part_" + string(java.util.UUID.randomUUID()) + out_ext);
+cleanup_temp = onCleanup(@() delete_if_exists(temp_file));
+writetable(out_table, temp_file);
+move_options = javaArray("java.nio.file.CopyOption", 2);
+move_options(1) = java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+move_options(2) = java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+java.nio.file.Files.move(java.io.File(temp_file).toPath(), java.io.File(out_file).toPath(), move_options);
+end
+
+function delete_if_exists(file_name)
+if isfile(file_name)
+    delete(file_name);
 end
 end
