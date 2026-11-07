@@ -50,6 +50,7 @@ picks the closest of the top three candidates.
 | `run_jitter_rsu_hiak_rev1.m` | Example driver that jitters `Rand_Table_RSU_HIAK.xlsx` and prints QA statistics. |
 | `test_jitter_base_station_table_rev1.m` | Unit tests for the spreadsheet function. |
 | `test_jitter_base_stations_rev1.m` | Unit tests for the core function. |
+| `red_team_experiments_rev1.m` | Adversarial checks: displacement bias, water placement, separation from protected receivers, and sensitivity to `Fraction` and `MaxRadius_m`. Needs the public Census `cb_2023_us_state_500k` file. |
 | `Rand_Table_RSU_HIAK.xlsx` | Original base station table from FSS_Neighborhood (62,113 sites). |
 
 ## Usage
@@ -66,6 +67,7 @@ From a spreadsheet:
 | `input_file` | Yes | | Any file `readtable` reads (`.xlsx`, `.csv`). |
 | `seed` | Yes | | Nonnegative integer seed. |
 | `Fraction` | No | `1/3` | Radius as a fraction of nearest-neighbor distance, in (0, 0.5). |
+| `MaxRadius_m` | No | `Inf` (no cap) | Cap on the jitter radius in meters, so isolated sites don't move tens of km. |
 | `OutputFile` | No | `""` (no file) | Where to write the jittered table. Can't be the input file. |
 | `LatitudeVariable` | No | `"Latitude"` | Latitude column name. |
 | `LongitudeVariable` | No | `"Longitude"` | Longitude column name. |

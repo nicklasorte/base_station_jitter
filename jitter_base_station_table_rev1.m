@@ -20,6 +20,8 @@ function [jitter_table, jitter_info] = jitter_base_station_table_rev1(input_file
 %   Name-value arguments:
 %     Fraction           - Jitter radius as a fraction of the nearest-
 %                          neighbor distance. Default 1/3. Must be in (0, 0.5).
+%     MaxRadius_m        - Cap on the jitter radius, in meters. Default Inf
+%                          (no cap).
 %     OutputFile         - File to write the jittered table to. Default ""
 %                          (no file written). Can't be the input file.
 %     LatitudeVariable   - Name of the latitude column. Default "Latitude".
@@ -38,6 +40,7 @@ arguments
     input_file (1,1) string {mustBeFile}
     seed (1,1) double {mustBeInteger, mustBeNonnegative}
     options.Fraction (1,1) double {mustBePositive, mustBeLessThan(options.Fraction,0.5)} = 1/3
+    options.MaxRadius_m (1,1) double {mustBePositive} = Inf
     options.OutputFile (1,1) string = ""
     options.LatitudeVariable (1,1) string = "Latitude"
     options.LongitudeVariable (1,1) string = "Longitude"
@@ -72,7 +75,7 @@ end
 
 %%%%% 2) Jitter.
 [lat_new, lon_new, jitter_info] = jitter_base_stations_rev1(lat, lon, ...
-    Seed=seed, Fraction=options.Fraction);
+    Seed=seed, Fraction=options.Fraction, MaxRadius_m=options.MaxRadius_m);
 
 jitter_table = bs_table;
 jitter_table.(lat_var) = lat_new;

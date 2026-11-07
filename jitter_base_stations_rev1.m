@@ -17,6 +17,10 @@ function [lat_new, lon_new, jitter_info] = jitter_base_stations_rev1(lat, lon, o
 %     Fraction   - Jitter radius as a fraction of the nearest-neighbor
 %                  distance. Default 1/3. Must be in (0, 0.5) so that two
 %                  jittered sites can never meet.
+%     MaxRadius_m - Optional cap on the jitter radius, in meters. Default
+%                  Inf (no cap). Use it to keep isolated sites, whose
+%                  nearest neighbor is far away, from moving tens of km.
+%                  The cap only shrinks radii, so sites still can't meet.
 %     Ellipsoid  - Reference ellipsoid for distances. Default WGS 84.
 %
 %   Outputs:
@@ -24,7 +28,7 @@ function [lat_new, lon_new, jitter_info] = jitter_base_stations_rev1(lat, lon, o
 %     jitter_info      - Table with one row per base station:
 %                        nn_idx       index of the nearest distinct neighbor
 %                        nn_dist_m    geodesic distance to that neighbor (m)
-%                        radius_m     jitter radius, Fraction*nn_dist_m (m)
+%                        radius_m     jitter radius, min(Fraction*nn_dist_m, MaxRadius_m) (m)
 %                        offset_m     distance moved (m)
 %                        azimuth_deg  direction moved, clockwise from north
 %
@@ -42,6 +46,7 @@ arguments
     lon (:,1) double {mustBeFinite}
     options.Seed (1,1) double {mustBeInteger, mustBeNonnegative}
     options.Fraction (1,1) double {mustBePositive, mustBeLessThan(options.Fraction,0.5)} = 1/3
+    options.MaxRadius_m (1,1) double {mustBePositive} = Inf
     options.Ellipsoid = wgs84Ellipsoid("m")
 end
 
@@ -85,7 +90,7 @@ nn_unique = idx_cand(sub2ind(size(idx_cand), (1:num_unique)', col_min));
 %%%%% 3) Map back to every input site (duplicates share their location's neighbor).
 nn_dist_m = nn_dist_unique(idx_map);
 nn_idx = idx_first(nn_unique(idx_map));
-radius_m = options.Fraction .* nn_dist_m;
+radius_m = min(options.Fraction .* nn_dist_m, options.MaxRadius_m);
 
 %%%%% 4) Uniform draw over each disc: range = R*sqrt(U1), azimuth = 360*U2.
 % sqrt(U1) makes the density uniform over area; a plain R*U1 would pile

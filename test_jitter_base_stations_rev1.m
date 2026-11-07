@@ -87,7 +87,33 @@ classdef test_jitter_base_stations_rev1 < matlab.unittest.TestCase
             tc.verifyEqual(info_sub.azimuth_deg, info_all.azimuth_deg(1:400));
         end
 
+        function max_radius_default_is_no_cap(tc)
+            [a1, o1] = jitter_base_stations_rev1(tc.lat, tc.lon, Seed=11);
+            [a2, o2] = jitter_base_stations_rev1(tc.lat, tc.lon, Seed=11, MaxRadius_m=Inf);
+            tc.verifyEqual([a2 o2], [a1 o1]);
+        end
+
+        function max_radius_caps_only_large_radii(tc)
+            [~, ~, info_free] = jitter_base_stations_rev1(tc.lat, tc.lon, Seed=11);
+            cap_m = median(info_free.radius_m);
+            [a, o, info_cap] = jitter_base_stations_rev1(tc.lat, tc.lon, Seed=11, MaxRadius_m=cap_m);
+            capped = info_free.radius_m > cap_m;
+            tc.assertTrue(any(capped) && any(~capped));
+            % Capped sites: radius equals the cap and they stay inside it.
+            tc.verifyEqual(info_cap.radius_m(capped), repmat(cap_m, nnz(capped), 1));
+            moved_m = distance(tc.lat, tc.lon, a, o, wgs84Ellipsoid("m"));
+            tc.verifyLessThanOrEqual(moved_m, cap_m*(1 + 1e-9) + 1e-6);
+            % Uncapped sites: same radius, same draw, same result as no cap.
+            tc.verifyEqual(info_cap.radius_m(~capped), info_free.radius_m(~capped));
+            tc.verifyEqual(info_cap.offset_m(~capped), info_free.offset_m(~capped));
+            % Same random draws: capped offsets scale by cap/radius.
+            tc.verifyEqual(info_cap.azimuth_deg, info_free.azimuth_deg);
+            tc.verifyEqual(info_cap.offset_m(capped), ...
+                info_free.offset_m(capped) .* cap_m ./ info_free.radius_m(capped), RelTol=1e-12);
+        end
+
         function errors(tc)
+            tc.verifyError(@() jitter_base_stations_rev1(tc.lat, tc.lon, Seed=1, MaxRadius_m=0), ?MException);
             tc.verifyError(@() jitter_base_stations_rev1(tc.lat, tc.lon), "jitter_base_stations:noSeed");
             tc.verifyError(@() jitter_base_stations_rev1([1;1], [2;2], Seed=1), "jitter_base_stations:tooFewSites");
             tc.verifyError(@() jitter_base_stations_rev1(tc.lat, tc.lon(1:10), Seed=1), "jitter_base_stations:sizeMismatch");

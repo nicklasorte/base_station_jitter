@@ -47,6 +47,14 @@ classdef test_jitter_base_station_table_rev1 < matlab.unittest.TestCase
             tc.verifyEqual(info, info_ref);
         end
 
+        function max_radius_passes_through(tc)
+            [t, info] = jitter_base_station_table_rev1(tc.input_file, 42, MaxRadius_m=100);
+            [lat_ref, lon_ref] = jitter_base_stations_rev1( ...
+                tc.input_table.Latitude, tc.input_table.Longitude, Seed=42, MaxRadius_m=100);
+            tc.verifyEqual([t.Latitude t.Longitude], [lat_ref lon_ref]);
+            tc.verifyLessThanOrEqual(info.radius_m, 100);
+        end
+
         function other_columns_unchanged(tc)
             t = jitter_base_station_table_rev1(tc.input_file, 42);
             tc.verifyEqual(t.Properties.VariableNames, tc.input_table.Properties.VariableNames);
