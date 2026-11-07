@@ -125,15 +125,19 @@ ax.YAxis.Color = c.gray;
 ax.YAxis.TickLabelColor = c.dark;
 xlabel(ax, "East-west distance (km)");
 ylabel(ax, "North-south distance (km)");
+ax.XLabel.Color = c.dark;
+ax.YLabel.Color = c.dark;
+ylim(ax, [min(y0) - 1, max(y0) + 5]);
+% AutoUpdate off keeps the callout lines added below out of the legend.
 legend(ax, [h_listed h_jitter], ["Listed location", sprintf("Jittered location (seed %d)", seed)], ...
-    Location="southwest", Box="off", FontName=c.font, FontSize=8, TextColor=c.dark);
+    Location="northeast", Box="off", FontName=c.font, FontSize=8, TextColor=c.dark, AutoUpdate="off");
 
 [r_max, i_max] = max(radius_km);
-label_at(ax, c, x0(i_max), y0(i_max), x0(i_max) - 3, y0(i_max) + 20, ...
-    sprintf("Isolated site: radius %.1f km", r_max));
+label_at(ax, c, x0(i_max), y0(i_max), x0(i_max) - 2, max(y0) + 3, ...
+    sprintf("Isolated site: radius %.1f km", r_max), "left");
 label_at(ax, c, median(x0(is_urban)), median(y0(is_urban)), 14, 14, ...
     sprintf("Dense urban sites: radius %.0f-%.0f m", 1000*min(radius_km(is_urban)), ...
-    1000*max(radius_km(is_urban))));
+    1000*max(radius_km(is_urban))), "center");
 exportgraphics(fig, out_file, Resolution=300);
 close(fig);
 end
@@ -172,7 +176,9 @@ bars.CData = [c.gray; c.gray; c.blue];
 scatter(ax, p95_m, 1:3, 220, c.dark, "|", LineWidth=1.6);
 ax.YDir = "reverse";
 yticks(ax, 1:3); yticklabels(ax, names);
+ylim(ax, [0.4 3.6]);
 xlim(ax, [0 4600]);
+ax.XLabel.Color = c.dark;
 set_comma_ticks(ax, 0:500:4500);
 xlabel(ax, sprintf("Distance moved, seed %d (m)", options.Seed));
 for k = 1:3
@@ -209,9 +215,10 @@ for p = 1:2
     bars.CData = [c.gray; c.blue; c.gray];
     ax.YDir = "reverse";
     yticks(ax, 1:3);
+    ylim(ax, [0.4 3.6]);
     if p == 1
         yticklabels(ax, names);
-        ylabel(ax, "Jitter fraction");
+        ylabel(ax, "Jitter fraction", Color=c.dark);
     else
         yticklabels(ax, []);
     end
@@ -246,11 +253,11 @@ function draw_circle(ax, x, y, r, color, width)
 rectangle(ax, Position=[x - r, y - r, 2*r, 2*r], Curvature=[1 1], EdgeColor=color, LineWidth=width);
 end
 
-function label_at(ax, c, x, y, tx, ty, label)
+function label_at(ax, c, x, y, tx, ty, label, align)
 % Callout: a thin leader line from the point to a text label.
 plot(ax, [x tx], [y ty], Color=c.dark, LineWidth=0.6);
 text(ax, tx, ty, label, FontName=c.font, FontSize=8, Color=c.dark, ...
-    HorizontalAlignment="center", VerticalAlignment="bottom");
+    HorizontalAlignment=align, VerticalAlignment="bottom");
 end
 
 function set_comma_ticks(ax, ticks)
