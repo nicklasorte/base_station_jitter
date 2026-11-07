@@ -45,16 +45,38 @@ picks the closest of the top three candidates.
 
 | File | Purpose |
 | --- | --- |
-| `jitter_base_stations_rev1.m` | The jitter function. |
-| `run_jitter_rsu_hiak_rev1.m` | Jitters `Rand_Table_RSU_HIAK.xlsx` and writes `Rand_Table_RSU_HIAK_jitter_seed<N>.xlsx` with the same columns. |
-| `test_jitter_base_stations_rev1.m` | Unit tests. |
+| `jitter_base_station_table_rev1.m` | Main entry point. Takes a spreadsheet and a seed, returns the jittered table, and optionally writes it. |
+| `jitter_base_stations_rev1.m` | Core function. Takes latitude and longitude vectors and a seed. |
+| `run_jitter_rsu_hiak_rev1.m` | Example driver that jitters `Rand_Table_RSU_HIAK.xlsx` and prints QA statistics. |
+| `test_jitter_base_station_table_rev1.m` | Unit tests for the spreadsheet function. |
+| `test_jitter_base_stations_rev1.m` | Unit tests for the core function. |
 | `Rand_Table_RSU_HIAK.xlsx` | Original base station table from FSS_Neighborhood (62,113 sites). |
 
 ## Usage
 
+From a spreadsheet:
+
+```matlab
+[jitter_table, jitter_info] = jitter_base_station_table_rev1("Rand_Table_RSU_HIAK.xlsx", 42, ...
+    OutputFile="Rand_Table_RSU_HIAK_jitter_seed42.xlsx");
+```
+
+| Argument | Required | Default | Description |
+| --- | --- | --- | --- |
+| `input_file` | Yes | | Any file `readtable` reads (`.xlsx`, `.csv`). |
+| `seed` | Yes | | Nonnegative integer seed. |
+| `Fraction` | No | `1/3` | Radius as a fraction of nearest-neighbor distance, in (0, 0.5). |
+| `OutputFile` | No | `""` (no file) | Where to write the jittered table. Can't be the input file. |
+| `LatitudeVariable` | No | `"Latitude"` | Latitude column name. |
+| `LongitudeVariable` | No | `"Longitude"` | Longitude column name. |
+
+The returned table has the same columns, in the same order, as the input.
+Only latitude and longitude change.
+
+From vectors already in memory:
+
 ```matlab
 [lat_new, lon_new, jitter_info] = jitter_base_stations_rev1(lat, lon, Seed=42);
-[lat_new, lon_new] = jitter_base_stations_rev1(lat, lon, Seed=42, Fraction=1/3);
 ```
 
 `jitter_info` is a table with `nn_idx`, `nn_dist_m`, `radius_m`,
@@ -76,14 +98,20 @@ Learning Toolbox (`knnsearch`, and `kstest` in the tests).
 ## Tests
 
 ```matlab
-runtests("test_jitter_base_stations_rev1")
+runtests(["test_jitter_base_stations_rev1", "test_jitter_base_station_table_rev1"])
 ```
 
-The tests check that the same seed gives the same output, the global
+The core tests check that the same seed gives the same output, the global
 `rng` state is untouched, every site stays inside its radius, the
 nearest-neighbor distance matches an exhaustive all-pairs geodesic search,
 no two sites meet, the draws are uniform over the disc area (KS test),
 duplicates separate, and bad inputs raise errors.
+
+The spreadsheet tests check that the same seed gives the same table, the
+result matches the core function, non-coordinate columns are unchanged,
+the output file round-trips, no file is written unless asked, CSV input
+and custom column names work, the function refuses to overwrite its input
+or accept NaN coordinates, and the full HIAK table jitters cleanly.
 
 ## Result on Rand_Table_RSU_HIAK.xlsx (seed 42)
 
