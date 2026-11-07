@@ -14,7 +14,7 @@ output_filename = sprintf("Rand_Table_RSU_HIAK_jitter_seed%d.xlsx", seed);
 
 if ~isfile(input_filename)
     error("run_jitter:missingInput", ...
-        "%s not found in %s. Copy it from the FSS_Neighborhood repo.", input_filename, pwd);
+        "%s not found in %s. It ships in the base_station_jitter repo.", input_filename, pwd);
 end
 bs_table = readtable(input_filename);
 required_vars = ["Latitude", "Longitude", "Height_M", "AZI", "ID"];

@@ -48,6 +48,7 @@ picks the closest of the top three candidates.
 | `jitter_base_stations_rev1.m` | The jitter function. |
 | `run_jitter_rsu_hiak_rev1.m` | Jitters `Rand_Table_RSU_HIAK.xlsx` and writes `Rand_Table_RSU_HIAK_jitter_seed<N>.xlsx` with the same columns. |
 | `test_jitter_base_stations_rev1.m` | Unit tests. |
+| `Rand_Table_RSU_HIAK.xlsx` | Original base station table from FSS_Neighborhood (62,113 sites). |
 
 ## Usage
 
@@ -59,9 +60,10 @@ picks the closest of the top three candidates.
 `jitter_info` is a table with `nn_idx`, `nn_dist_m`, `radius_m`,
 `offset_m`, and `azimuth_deg` for each site.
 
-To jitter the HIAK table, copy `Rand_Table_RSU_HIAK.xlsx` from
-[FSS_Neighborhood](https://github.com/nicklasorte/FSS_Neighborhood) into
-this folder, set `seed` in `run_jitter_rsu_hiak_rev1.m`, and run it. The
+To jitter the HIAK table, set `seed` in `run_jitter_rsu_hiak_rev1.m` and
+run it. `Rand_Table_RSU_HIAK.xlsx` in this repo is the original, unjittered
+table, copied from
+[FSS_Neighborhood](https://github.com/nicklasorte/FSS_Neighborhood). The
 output keeps `Height_M`, `AZI`, and `ID` unchanged, so it replaces the
 original file in `init_sim_folder_FSS_neigh_rev25_fdr_github.m`.
 
