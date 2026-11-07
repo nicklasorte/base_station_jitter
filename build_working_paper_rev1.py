@@ -47,7 +47,8 @@ with tempfile.TemporaryDirectory() as tmp:
     styles = styles.replace("<w:rPrDefault><w:rPr>",
                             f'<w:rPrDefault><w:rPr><w:rFonts w:ascii="{FONT}" w:hAnsi="{FONT}" '
                             f'w:eastAsia="{FONT}" w:cs="{FONT}"/>', 1)
-    styles = re.sub(r'<w:color\b[^>]*/>', f'<w:color w:val="{DARK_BLUE}"/>', styles)
+    # Pandoc 3.1's default template has a stray ">" after one color element.
+    styles = re.sub(r'<w:color\b[^>]*/>(?:>|&gt;)?', f'<w:color w:val="{DARK_BLUE}"/>', styles)
     # Table style: light horizontal rules so tables read in print.
     styles = re.sub(
         r'(<w:style w:type="table" w:default="1" w:styleId="Table">.*?<w:tblPr>)',

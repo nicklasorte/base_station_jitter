@@ -50,6 +50,11 @@ picks the closest of the top three candidates.
 | `run_jitter_rsu_hiak_rev1.m` | Example driver that jitters `Rand_Table_RSU_HIAK.xlsx` and prints QA statistics. |
 | `test_jitter_base_station_table_rev1.m` | Unit tests for the spreadsheet function. |
 | `test_jitter_base_stations_rev1.m` | Unit tests for the core function. |
+| `WORKING_PAPER_rev1.docx` | Working paper (DRAFT//PRE-DECISIONAL): method, verification, HIAK results, red-team summary, and code traceability. |
+| `WORKING_PAPER_rev1.md` | Source text for the working paper. |
+| `build_working_paper_rev1.py` | Builds the `.docx` from the source text with pandoc and adds NTIA styling and markings. |
+| `make_figures_rev1.m` | Draws the working paper's four figures into `figures/`. |
+| `briefing_style.m` | NTIA figure style (palette and Times New Roman) used by `make_figures_rev1.m`. |
 | `RED_TEAM_rev1.md` | Red-team review from a skeptical federal agency's view, with findings and responses. |
 | `red_team_log_rev1.txt` | Raw output of the red-team run that the review cites. |
 | `red_team_experiments_rev1.m` | Adversarial checks: displacement bias, water placement, separation from protected receivers, and sensitivity to `Fraction` and `MaxRadius_m`. Needs the public Census `cb_2023_us_state_500k` file. |
